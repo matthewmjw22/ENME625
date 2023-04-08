@@ -1,5 +1,5 @@
 # ENME625
-READ ME for ENAE625 2nd Half Project
+READ ME for ENME625 2nd Half Project
 
 
 To-DO before 14 April:
