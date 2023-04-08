@@ -18,5 +18,5 @@ lb = zeros(1, n);
 ub = ones(1, n);
 nonlcon = @(x) deal([], [1 - sqrt(x(1)/(1 + 9/(n-1) * sum(x(2:end))))]);
 
-options = optimoptions('gamultiobj','PopulationSize',100,'MaxGenerations',500,'Display','final');
+options = optimoptions('gamultiobj','PopulationSize',100,'MaxGenerations',500,'Display','final', 'PlotFcn',@gaplotpareto);
 [x,fval] = gamultiobj(fun,n,[],[],[],[],lb,ub,nonlcon,options);
