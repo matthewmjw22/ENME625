@@ -18,8 +18,8 @@ g = @(x) 1 + 9/(n-1) * sum(x(2:end));
 h = @(x) 1 - sqrt(x(1)/g(x)) - (x(1)/g(x))*sin(10*pi*x(1));
 f2 = @(x) g(x)*h(x); % minimize
 
-lb = zeros(1,n); % lower bound
-ub = ones(1,n); % upper bound
+lb = 0; % lower bound
+ub = 1; % upper bound
 
 nonlcon = @(x) deal([], [1 - x(1)]); % nonlinear constraint, x1 <= 1
 
