@@ -1,11 +1,12 @@
-syms x1 x2
+clc
+clear all
 
-f1 = x1;  % Min
+nvars = 2;
+lb = [0; 0];
+ub = [pi; pi];
+MaxGenerations_Data = 200;
 
-f2 = x2;  % Min
+[x,fval,exitflag,output,population,score] = gammultiobjsolverTNK(nvars,lb,ub,MaxGenerations_Data);
 
-g1 = x1^2 + x2^2 -1 - 0.1*cos(16*atan(x1/x2)) <= 0;
-
-g2 = (x1 - 0.5)^2 + (x2 - 0.5)^2 -0.5 <= 0;
-
-% x1 and x2 between [0, pi]
+fval
+x
