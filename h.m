@@ -14,4 +14,4 @@ sqrt(sum(((fvals(4,:) - fvals(5,:))./transpose(Max - Min)).^2))
 % 
 % dist = calc_rank_distances(x, fvals, rank)
 
-[dist, rank, niche] = NSGA(x, fvals)
+[dist, rank, niche, Fi] = NSGA(x, fvals)

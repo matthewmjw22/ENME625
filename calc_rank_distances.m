@@ -1,9 +1,10 @@
-function [dist, niche] = calc_rank_distances(x, fvals, rank_test, sigma, alpha)
+function [dist, niche, Fi] = calc_rank_distances(x, fvals, rank_test, sigma, alpha, epsilon)
     Max = [max(fvals(:,1)); max(fvals(:,2));];
     Min = [min(fvals(:,1)); min(fvals(:,2));];
     M = max(rank_test);
     dist = zeros(length(rank_test), 1);
     niche = ones(size(fvals, 1), 1);
+    Fi = ones(size(fvals, 1), 1);
     rank_sum = zeros(size(fvals, 1), 1); % initialize rank_sum
     for j = 1:M
         rank_indices = find(rank_test == j);
@@ -24,9 +25,19 @@ function [dist, niche] = calc_rank_distances(x, fvals, rank_test, sigma, alpha)
                 rank_sum(rank_indices(l)) = rank_sum(rank_indices(l)) + d;
             end
         end
+        
+        if j == 1
+            Fi(rank_indices) = size(fvals, 1) ./ niche(rank_indices);
+        else
+            min_fi = min(Fi(past_rank_indicies)) - epsilon;
+            Fi(rank_indices) = min_fi ./ niche(rank_indices);
+        end
+        past_rank_indicies = rank_indices
+        
     end
     % copy rank sums to output array
     for i = 1:length(rank_test)
         dist(i) = rank_sum(i);
     end
+    
 end
