@@ -32,7 +32,7 @@ function [dist, niche, Fi] = calc_rank_distances(x, fvals, rank_test, sigma, alp
             min_fi = min(Fi(past_rank_indicies)) - epsilon;
             Fi(rank_indices) = min_fi ./ niche(rank_indices);
         end
-        past_rank_indicies = rank_indices
+        past_rank_indicies = rank_indices;
         
     end
     % copy rank sums to output array
