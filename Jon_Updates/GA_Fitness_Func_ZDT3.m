@@ -27,7 +27,7 @@ global objective_func_value_storage
 
 % Initialize empty vector for objective function value storage
 % 2 coresponds to 2 objective functions for this problem
-
+population_objectives_vector = zeros(NumDesign,2);
 
 % R1 = penalty factor
 R1 = 1000;
@@ -41,6 +41,7 @@ for ix = 1:NumDesign
     
     % ---------- INITIAL OBJECTIVE FUNCTION VALUATION -------------------
 
+    x1 = Input(1);
     x1 = Input(1);
     x2 = Input(2);
     x3 = Input(3);
@@ -71,11 +72,10 @@ for ix = 1:NumDesign
     x28 = Input(28);
     x29 = Input(29);
     x30 = Input(30);
-
+    
     g = 1 + (9/29)*sum(Input(2:30));
-
     F1 = x1; % Min
-    F2 = 1 - (x1/g)^2;  %Min
+    F2 = 1 - sqrt(x1/g) - (x1/g)*sin(10*pi*x1);  %Min
 
 
     % update fittness vector
@@ -95,15 +95,15 @@ final_population_fitness = shared_fitness
 % ------------------ OUTPUT FORMARTTING ------------------------------
 
 % output population data to excel file:
-population_data = [X, population_objectives_vector, fronts, niche, shared_fitness];
+population_data = [population_objectives_vector, fronts, niche, shared_fitness];
 filename = 'population_data.xlsx';
 writematrix(population_data,filename,'Sheet',1)
 
 % append to value storage global vector
-objective_func_value_storage = [objective_func_value_storage; population_objectives_vector];
+objective_func_value_storage = [objective_func_value_storage; population_objectives_vector]
 
 % Plot the latest generations
-plot(gen.*ones(NumDesign,1), final_population_fitness,'.k');
+plot(gen.*ones(NumDesign,1),final_population_fitness,'.k');
 plot(gen, min(final_population_fitness),'+m');
 gen = gen+1;
 pause(0.1)
