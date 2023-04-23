@@ -90,7 +90,7 @@ fronts = non_dominated_sort(population_objectives_vector);
 [dist, niche, shared_fitness] = calc_rank_distances(X, population_objectives_vector, fronts, .75, 1, .25);
 
 % Define final population fitness output vector:
-final_population_fitness = shared_fitness
+final_population_fitness = -shared_fitness
 
 % ------------------ OUTPUT FORMARTTING ------------------------------
 
