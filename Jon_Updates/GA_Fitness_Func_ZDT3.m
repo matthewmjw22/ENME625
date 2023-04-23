@@ -1,4 +1,4 @@
-function final_population_fitness = GA_Fitness_Func_ZDT2(X)
+function final_population_fitness = GA_Fitness_Func_ZDT3(X)
 
 % This function calculates the multi-objective, constraint adusted fitness
 % of a population of candidate solutions
