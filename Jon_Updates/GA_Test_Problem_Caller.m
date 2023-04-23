@@ -23,7 +23,7 @@ num_generations = 25;
 color_vector = {[0.5 0.4 0.1]; [0.8, 0.4, 0.6]};
 
 % CALL THE TEST PROBLEM YOU WISH TO RUN
-RUN_CTP(num_runs, population_size, num_generations);
+RUN_ZDT3(num_runs, population_size, num_generations);
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -130,6 +130,12 @@ function RUN_OSY(num_runs, population_size, num_generations)
          'LineWidth',0.75)
         xlim([-300 0])
         ylim([0 80])
+        
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    pareto_spread
+    clus = cluster(overall_rank_1_population, 500);
+    clus
+
 end
 %----------------------------------------------------------------------------
 
@@ -236,6 +242,12 @@ function RUN_CTP(num_runs, population_size, num_generations)
          'MarkerEdgeColor',[0 .5 .5],...
          'MarkerFaceColor',[0 .7 .7],...
          'LineWidth',0.75)
+     
+     
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    pareto_spread
+    clus = cluster(overall_rank_1_population, 500);
+    clus
 end
 %----------------------------------------------------------------------------
 
@@ -322,6 +334,11 @@ function RUN_TNK(num_runs, overall_runs_rank_1, population_size, num_generations
          'MarkerEdgeColor',[0 .5 .5],...
          'MarkerFaceColor',[0 .7 .7],...
          'LineWidth',0.75)
+     
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    pareto_spread
+    clus = cluster(overall_rank_1_population, 500);
+    clus
 end
 %----------------------------------------------------------------------------
 
@@ -416,6 +433,11 @@ function RUN_ZDT1(num_runs, overall_runs_rank_1, population_size, num_generation
          'MarkerEdgeColor',[0 .5 .5],...
          'MarkerFaceColor',[0 .7 .7],...
          'LineWidth',1.5)
+     
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    pareto_spread
+    clus = cluster(overall_rank_1_population, 500);
+    clus
 end
 %----------------------------------------------------------------------------
 
@@ -481,6 +503,11 @@ function RUN_ZDT2(num_runs, overall_runs_rank_1, population_size, num_generation
          'MarkerEdgeColor',[0 .5 .5],...
          'MarkerFaceColor',[0 .7 .7],...
          'LineWidth',1.5)
+     
+        pareto_spread = Pareto_Spread(overall_rank_1_population);
+        pareto_spread
+        clus = cluster(overall_rank_1_population, 500);
+        clus
     
     end
     
@@ -597,5 +624,9 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
          'MarkerEdgeColor',[0 .5 .5],...
          'MarkerFaceColor',[0 .7 .7],...
          'LineWidth',1.5)
+     
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    pareto_spread
+    clus = cluster(overall_rank_1_population, 500);
+    clus
 end
-%----------------------------------------------------------------------------
