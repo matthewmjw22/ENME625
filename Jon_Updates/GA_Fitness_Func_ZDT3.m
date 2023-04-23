@@ -75,7 +75,7 @@ for ix = 1:NumDesign
     
     g = 1 + (9/29)*sum(Input(2:30));
     F1 = x1; % Min
-    F2 = 1 - sqrt(x1/g) - (x1/g)*sin(10*pi*x1);  %Min
+    F2 = (1 - sqrt(x1/g) - (x1/g)*sin(10*pi*x1))*g;  %Min
 
 
     % update fittness vector
