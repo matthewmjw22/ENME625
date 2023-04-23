@@ -32,8 +32,6 @@ function cluster = cluster(fval, num_grid)
         for i = 1:n
             x_new = ceil(floor(x(i)*num_grid) / max(x) +.0001);
             y_new = ceil(floor(y(i)*num_grid) / max(y) +.0001);
-            disp(x_new)
-            disp(y_new)
             array(x_new, y_new) = array(x_new, y_new) + 1;  
         end
         
