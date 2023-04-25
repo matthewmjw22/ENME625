@@ -102,7 +102,7 @@ function final_population_fitness = GA_Fitness_Func_TNK(X)
     fronts = non_dominated_sort(constrained_fitness);
     
     % CALCULATE THE ADJUSTED FITTNESS VALUES FOR EACH INDIVIDUAL
-    [dist, niche, shared_fitness] = calc_rank_distances(X, constrained_fitness, fronts, .75, 1, .25);
+    [dist, niche, shared_fitness] = calc_rank_distances(X, constrained_fitness, fronts, .50, 4, .25);
     
     % define final population fitness storage vector:
     % Define final population fitness output vector:

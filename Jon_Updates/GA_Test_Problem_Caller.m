@@ -4,8 +4,8 @@ clear all
 
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % GA run parameters
-num_runs = 6;
-population_size = 350;
+num_runs = 10;
+population_size =250;
 num_generations = 30;
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % FUNCTION LIBRARY
