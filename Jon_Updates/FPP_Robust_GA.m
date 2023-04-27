@@ -1,4 +1,4 @@
-function final_population_fitness = GA_Fitness_Func_TNK(X)
+function final_population_fitness = FPP_fitness(X)
 
 % This function calculates the multi-objective, constraint adusted fitness
 % of a population of candidate solutions
@@ -23,13 +23,15 @@ function final_population_fitness = GA_Fitness_Func_TNK(X)
     NumDesign = size(X, 1);
     
     global gen
+    global P1
+    global P2
     
     % Initialize empty vector for objective function value storage
     % 2 coresponds to 2 objective functions for this problem
     population_objectives_vector = zeros(NumDesign,2);
     
     % R1 = penalty factor
-    R1 = 100000;
+    R1 = 100000000;
     
     % CALCULATE THE INITIAL OBJECTIVE FUNCTION VALUES FOR EACH INDIVIDUAL
     % ix is the index for current design
@@ -63,13 +65,13 @@ function final_population_fitness = GA_Fitness_Func_TNK(X)
         % pluck indiovidual dsign out of the population array
         x = X(ix,:);
     
+        C = [zeros(2,1)];
         x1 = x(1);
         x2 = x(2);
-
-        C = [zeros(2,1)];
-        C(1) = -1*((x1^2) + (x2^2) - 1 - (0.1*cos(16*atan(x1/x2))));
-        C(2) = ((x1 - 0.5)^2) + ((x2 - 0.5)^2) - 0.5;
-
+    
+        C(1) = -(x1^2 + x2^2 -1 - 0.1*cos(16*atan(x1/x2))   - 0.2*sin(P1)*cos(P2));
+        C(2) = (x1 - 0.5)^2 + (x2 - 0.5)^2 -0.5;
+    
         Ceq = [];
     
          % initilize constraint violation value = 0
@@ -80,16 +82,12 @@ function final_population_fitness = GA_Fitness_Func_TNK(X)
             if C(z) > 0
     
                 total_violation = total_violation + C(z);
-            
-            elseif isnan(C(z))
-                disp('NAN Value Found')
-                total_violation = total_violation + 1000;
    
             end 
     
         end
 
-        violation_tracker(ix,1) = total_violation;
+        violation_tracker(ix,1) = total_violation * R1;
 
         constrained_fitness(ix,1) = population_objectives_vector(ix,1) + (total_violation * R1);
         constrained_fitness(ix,2) = population_objectives_vector(ix,2) + (total_violation * R1);
@@ -102,12 +100,16 @@ function final_population_fitness = GA_Fitness_Func_TNK(X)
     fronts = non_dominated_sort(constrained_fitness);
     
     % CALCULATE THE ADJUSTED FITTNESS VALUES FOR EACH INDIVIDUAL
-    [dist, niche, shared_fitness] = calc_rank_distances(X, constrained_fitness, fronts, .50, 4, .25);
+    [dist, niche, shared_fitness] = calc_rank_distances(X,  constrained_fitness, fronts, .50, 4, .25);
+    
     
     % define final population fitness storage vector:
     % Define final population fitness output vector:
     final_population_fitness = -shared_fitness;
+    
+    
 
+    
     
     % ------------------ OUTPUT FORMARTTING ------------------------------
     % output population data to excel file:
@@ -116,7 +118,7 @@ function final_population_fitness = GA_Fitness_Func_TNK(X)
     writematrix(population_data,filename,'Sheet',1);
     
     % Plot the latest generations
-    %plot(gen.*ones(NumDesign,1),constrained_fitness,'.k');
-    %plot(gen, min(constrained_fitness),'+m');
-    %gen = gen+1;
-    %pause(0.1)
+    plot(gen.*ones(NumDesign,1),constrained_fitness,'.k');
+    plot(gen, min(constrained_fitness),'+m');
+    gen = gen+1;
+    pause(0.1)

@@ -29,7 +29,7 @@ function final_population_fitness = GA_Fitness_Func_ZDT2(X)
     population_objectives_vector = zeros(NumDesign,2);
     
     % R1 = penalty factor
-    R1 = 100000000;
+    R1 = 1000000;
     
     % CALCULATE THE INITIAL OBJECTIVE FUNCTION VALUES FOR EACH INDIVIDUAL
     % ix is the index for current design
@@ -38,50 +38,47 @@ function final_population_fitness = GA_Fitness_Func_ZDT2(X)
         % pluck indiovidual dsign out of the population array
         Input = X(ix,:);
     
-       x1 = Input(1);
-            x2 = Input(2);
-            x3 = Input(3);
-            x4 = Input(4);
-            x5 = Input(5);
-            x6 = Input(6);
-            x7 = Input(7);
-            x8 = Input(8);
-            x9 = Input(9);
-            x10 = Input(10);
-            x11 = Input(11);
-            x12 = Input(12);
-            x13 = Input(13);
-            x14 = Input(14);
-            x15 = Input(15);
-            x16 = Input(16);
-            x17 = Input(17);
-            x18 = Input(18);
-            x19 = Input(19);
-            x20 = Input(20);
-            x21 = Input(21);
-            x22 = Input(22);
-            x23 = Input(23);
-            x24 = Input(24);
-            x25 = Input(25);
-            x26 = Input(26);
-            x27 = Input(27);
-            x28 = Input(28);
-            x29 = Input(29);
-            x30 = Input(30);
-        
-            g = 1 + (9/29)*sum(Input(2:30));
-        
-            F1 = x1; % Min
-            F2 = (1 - (x1/g)^2)*g;  %Min
+        x1 = Input(1);
+        x2 = Input(2);
+        x3 = Input(3);
+        x4 = Input(4);
+        x5 = Input(5);
+        x6 = Input(6);
+        x7 = Input(7);
+        x8 = Input(8);
+        x9 = Input(9);
+        x10 = Input(10);
+        x11 = Input(11);
+        x12 = Input(12);
+        x13 = Input(13);
+        x14 = Input(14);
+        x15 = Input(15);
+        x16 = Input(16);
+        x17 = Input(17);
+        x18 = Input(18);
+        x19 = Input(19);
+        x20 = Input(20);
+        x21 = Input(21);
+        x22 = Input(22);
+        x23 = Input(23);
+        x24 = Input(24);
+        x25 = Input(25);
+        x26 = Input(26);
+        x27 = Input(27);
+        x28 = Input(28);
+        x29 = Input(29);
+        x30 = Input(30);
+    
+        g = 1 + (9/29)*sum(Input(2:30));
+    
+        F1 = x1; % Min
+        F2 = (1 - (x1/g)^2)*g;  %Min
 
         % update fittness vector
         population_objectives_vector(ix,1) = F1;
         population_objectives_vector(ix,2) = F2;
     end
     
-    
-    % attempting to implement CH-I2 (Kurpati et al 2002)
-    %average_constraint_violation = sum(violation_storage) / NumDesign;
     
     % DETERMINE THE FRONTS OF THE POPULATION SET
     fronts = non_dominated_sort(population_objectives_vector);
@@ -102,7 +99,7 @@ function final_population_fitness = GA_Fitness_Func_ZDT2(X)
     writematrix(population_data,filename,'Sheet',1);
     
     % Plot the latest generations
-    plot(gen.*ones(NumDesign,1),population_objectives_vector,'.k');
-    plot(gen, min(population_objectives_vector),'+m');
-    gen = gen+1;
-    pause(0.1)
+    %plot(gen.*ones(NumDesign,1),population_objectives_vector,'.k');
+    %plot(gen, min(population_objectives_vector),'+m');
+    %gen = gen+1;
+    %pause(0.1)

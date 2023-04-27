@@ -118,10 +118,10 @@ function final_population_fitness = GA_Fitness_Func_TNK_MORO(X)
     writematrix(population_data,filename,'Sheet',1);
     
     % Plot the latest generations
-    plot(gen.*ones(NumDesign,1),constrained_fitness,'.k');
-    plot(gen, min(constrained_fitness),'+m');
-    gen = gen+1;
-    pause(0.1)
+    %plot(gen.*ones(NumDesign,1),constrained_fitness,'.k');
+    %plot(gen, min(constrained_fitness),'+m');
+    %gen = gen+1;
+    %pause(0.1)
     
     
     

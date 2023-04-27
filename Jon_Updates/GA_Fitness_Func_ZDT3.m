@@ -23,7 +23,6 @@ function final_population_fitness = GA_Fitness_Func_ZDT3(X)
 NumDesign = size(X, 1);
 
 global gen
-global objective_func_value_storage
 
 % Initialize empty vector for objective function value storage
 % 2 coresponds to 2 objective functions for this problem
@@ -90,20 +89,17 @@ fronts = non_dominated_sort(population_objectives_vector);
 [dist, niche, shared_fitness] = calc_rank_distances(X, population_objectives_vector, fronts, .75, 1, .25);
 
 % Define final population fitness output vector:
-final_population_fitness = -shared_fitness
+final_population_fitness = -shared_fitness;
 
 % ------------------ OUTPUT FORMARTTING ------------------------------
 
 % output population data to excel file:
 population_data = [population_objectives_vector, fronts, niche, shared_fitness];
 filename = 'population_data.xlsx';
-writematrix(population_data,filename,'Sheet',1)
-
-% append to value storage global vector
-objective_func_value_storage = [objective_func_value_storage; population_objectives_vector]
+writematrix(population_data,filename,'Sheet',1);
 
 % Plot the latest generations
-plot(gen.*ones(NumDesign,1),final_population_fitness,'.k');
-plot(gen, min(final_population_fitness),'+m');
-gen = gen+1;
-pause(0.1)
+%plot(gen.*ones(NumDesign,1),final_population_fitness,'.k');
+%plot(gen, min(final_population_fitness),'+m');
+%gen = gen+1;
+%pause(0.1)

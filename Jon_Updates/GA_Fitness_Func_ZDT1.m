@@ -87,7 +87,7 @@ function final_population_fitness = GA_Fitness_Func_ZDT1(X)
     fronts = non_dominated_sort(population_objectives_vector);
     
     % CALCULATE THE ADJUSTED FITTNESS VALUES FOR EACH INDIVIDUAL
-    [dist, niche, shared_fitness] = calc_rank_distances(X,  population_objectives_vector, fronts, .75, 1, .25);
+    [dist, niche, shared_fitness] = calc_rank_distances(X,  population_objectives_vector, fronts, .75, 2, .25);
     
     
     % define final population fitness storage vector:
@@ -102,7 +102,7 @@ function final_population_fitness = GA_Fitness_Func_ZDT1(X)
     writematrix(population_data,filename,'Sheet',1);
     
     % Plot the latest generations
-    plot(gen.*ones(NumDesign,1),population_objectives_vector,'.k');
-    plot(gen, min(population_objectives_vector),'+m');
-    gen = gen+1;
-    pause(0.1)
+    %plot(gen.*ones(NumDesign,1),population_objectives_vector,'.k');
+    %plot(gen, min(population_objectives_vector),'+m');
+   % gen = gen+1;
+    %pause(0.1)
