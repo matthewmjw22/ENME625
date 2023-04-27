@@ -4,8 +4,8 @@ clear all
 
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % GA run parameters
-num_runs = 10;
-population_size =250;
+num_runs = 6;
+population_size = 150;
 num_generations = 30;
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % FUNCTION LIBRARY
@@ -23,7 +23,7 @@ num_generations = 30;
 color_vector = {[0.5 0.4 0.1]; [0.8, 0.4, 0.6]};
 
 % CALL THE TEST PROBLEM YOU WISH TO RUN
-RUN_TNK(num_runs, population_size, num_generations);
+RUN_TNK_MORO(num_runs, population_size, num_generations);
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -135,6 +135,7 @@ function RUN_OSY(num_runs, population_size, num_generations)
     pareto_spread
     clus = cluster(overall_rank_1_population, 500);
     clus
+    overall_rank_1_population
 
 end
 %----------------------------------------------------------------------------
@@ -248,6 +249,7 @@ function RUN_CTP(num_runs, population_size, num_generations)
     pareto_spread
     clus = cluster(overall_rank_1_population, 500);
     clus
+    overall_rank_1_population
 end
 %----------------------------------------------------------------------------
 
@@ -748,6 +750,173 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
          'MarkerFaceColor',[0 .7 .7],...
          'LineWidth',1.5)
      
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    pareto_spread
+    clus = cluster(overall_rank_1_population, 500);
+    clus
+end
+
+%----------------------------------------------------------------------------
+function RUN_TNK_MORO(num_runs, population_size, num_generations)
+    
+    % define global generation tracker (for plotting purposes)
+    global gen
+
+
+    % define first rank (pareto front) storage vector:
+    population_storage = [];
+    global P1
+    global P2
+    P1 = 1;
+    P2 = 1;
+    for run = 1:num_runs
+    %---------------------------- TNK PROBLEM-------------------------------
+
+        nvars = 2;
+        lb = [0, 0];
+        ub = [pi, pi];
+        
+        options = optimoptions('ga');
+        options = optimoptions(options,'MaxGenerations', num_generations);
+        options = optimoptions(options,'CreationFcn', @gacreationuniform);
+        options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
+        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'Display', 'iter');
+        options = optimoptions(options,'MaxStallGenerations', 40);
+        options = optimoptions(options, 'PlotFcn', @gaplotbestf);
+        options = optimoptions(options,'Vectorized', 'on')
+        options = optimoptions(options,'PopulationSize', population_size);
+    
+        gen = 0;
+       
+        % call the GA for the required test problem
+        [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_TNK_MORO,nvars,[],[],[],[],lb,ub,[],options);
+        legend('Population','Best');
+
+        %---------------------------------------------------------
+        % calculating the objectivre function values for the final
+        % generation population
+
+        % objective function value storage array:
+        objective_func_value_storage = zeros(population_size,2);
+
+        for ix = 1:size(population,1)
+        
+            % pluck indiovidual dsign out of the population array
+            x = population(ix,:);
+            
+            % ---------- INITIAL OBJECTIVE FUNCTION VALUATION -------------------
+        
+            x1 = x(1);
+            x2 = x(2);
+    
+            F1 = x1; % Min
+            F2 = x2;  %Min
+        
+            % update fittness vector
+            objective_func_value_storage(ix,1) = F1;
+            objective_func_value_storage(ix,2) = F2;
+        end
+
+        % CONSTRAINT HANDELING
+        % define empty array for storing constrain values:
+        constrained_fitness = zeros(size(population,1),2);
+    
+        for ix = 1:size(population,1)
+        
+            % pluck indiovidual dsign out of the population array
+            x = population(ix,:);
+        
+            x1 = x(1);
+            x2 = x(2);
+    
+            C = [zeros(2,1)];
+            C(1) = -1*(x1^2 + x2^2 -1 - 0.1*cos(16*atan(x1/x2)));
+            C(2) = (x1 - 0.5)^2 + (x2 - 0.5)^2 -0.5;
+    
+            Ceq = [];
+        
+             % initilize constraint violation value = 0
+            total_violation = 0;
+        
+            for z = 1:length(C)
+        
+                if C(z) > 0
+        
+                    total_violation = total_violation + C(z);
+
+                elseif isnan(C(z))
+
+                    total_violation = total_violation + 1000;
+       
+                end 
+        
+            end
+    
+            constrained_fitness(ix,1) = objective_func_value_storage(ix,1) + (total_violation * 1000);
+            constrained_fitness(ix,2) = objective_func_value_storage(ix,2) + (total_violation * 1000);
+        end
+
+        population_storage = [population_storage; constrained_fitness];
+        %--------------------------------------------------------
+        
+        A = 2;
+        B = 1;
+        % Define the function to be maximized
+        fun = @(P) (A^2 + B^2 -1 - 0.1*cos(16*atan(A/B))   - 0.2*sin(P(1))*cos(P(2)));
+
+        % Define the bounds on the variables
+        lb = [-1, -1];
+        ub = [3, 3];
+        NumDesign = size(population,1);
+        for i = 1:NumDesign
+            A = population(i, 1);
+            B = population(i, 2);
+            % Call fmincon to find the maximum value of the function
+            P0 = [1, 1]; % starting point
+            [x, ~] = fmincon(fun, P0, [], [], [], [], lb, ub);
+            Ps(i, 1) = x(1);
+            Ps(i, 2) = x(2);
+            G(i, 1) = -(A^2 + B^2 -1 - 0.1*cos(16*atan(A/B))   - 0.2*sin(x(1))*cos(x(2)));
+        end
+        [max_value, max_index] = max(G);
+        P1 = Ps(max_index, 1);
+        P2 = Ps(max_index, 2);
+    end
+    
+     % plot the final pareto front for the simulated number of GA runs
+    figure('Name','Overall Population');
+    scatter(population_storage(:,1), population_storage(:,2), 5, ...
+         'MarkerEdgeColor',[0 .5 .5],...
+         'MarkerFaceColor',[0 .7 .7],...
+         'LineWidth',0.75)
+
+    % determines rankls and picks out the indexes of the first rank
+    % individuals
+    ranks = non_dominated_sort(population_storage);
+    rank_1_indexes_overall = find(ranks == 1);
+
+     % storage variable for OVERALL (for all runs) "first rank" solutions
+    overall_rank_1_population = zeros(length(rank_1_indexes_overall), 2);
+    
+    % loops through each index and adds the objective function values to
+    % the above strage array - which will be plotted
+    for j = 1:length(rank_1_indexes_overall)
+        
+        index = rank_1_indexes_overall(j);
+    
+        overall_rank_1_population(j,1) = population_storage(index,1);
+        overall_rank_1_population(j,2) = population_storage(index,2);
+    
+    end
+
+    % plot the final pareto front for the simulated number of GA runs
+    figure('Name','Pareto Front');
+    scatter(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), 15, ...
+         'MarkerEdgeColor',[0 .5 .5],...
+         'MarkerFaceColor',[0 .7 .7],...
+         'LineWidth',0.75)
+
     pareto_spread = Pareto_Spread(overall_rank_1_population);
     pareto_spread
     clus = cluster(overall_rank_1_population, 500);
