@@ -36,7 +36,7 @@ function cluster = cluster(fval, num_grid)
         end
         
         unique = nnz(array);
-        cluster = unique/n;
+        cluster = n/unique;
     end
 
 end
