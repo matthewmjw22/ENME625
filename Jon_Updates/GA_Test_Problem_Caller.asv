@@ -5,7 +5,7 @@ close all
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 % GA run parameters
-num_runs = 9;
+num_runs = 12;
 population_size = 300;
 num_generations = 20;
 
@@ -26,7 +26,7 @@ num_generations = 20;
 %##########################################################################
 % CALL THE TEST PROBLEM YOU WISH TO RUN
 % ENTER THE PROBLEM DESIGNATOR AFTER RUN_
-RUN_ZDT3(num_runs, population_size, num_generations);
+RUN_OSY(num_runs, population_size, num_generations);
 %##########################################################################
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -172,7 +172,7 @@ function RUN_OSY(num_runs, population_size, num_generations)
         end
     
          % Plot the points
-        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
+        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '.');
     
         % Keep the current plot active
         hold on;
@@ -444,7 +444,7 @@ function RUN_CTP(num_runs, population_size, num_generations)
         end
     
          % Plot the points
-        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
+        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '.');
     
         % Keep the current plot active
         hold on;
@@ -701,7 +701,7 @@ function RUN_TNK(num_runs, population_size, num_generations)
         end
     
          % Plot the points
-        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
+        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '.');
     
         % Keep the current plot active
         hold on;
@@ -933,7 +933,7 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
         % EFFECTS
         % determines rankls and picks out the indexes of the first rank
         % individuals
-        ranks = non_dominated_sort(objective_func_value_storage)
+        ranks = non_dominated_sort(constrained_fitness)
         rank_1_indexes_overall = find(ranks == 1);
     
          % storage variable for OVERALL (for all runs) "first rank" solutions
@@ -945,13 +945,13 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
             
             index = rank_1_indexes_overall(j);
         
-            overall_rank_1_population(j,1) = objective_func_value_storage(index,1);
-            overall_rank_1_population(j,2) = objective_func_value_storage(index,2);
+            overall_rank_1_population(j,1) = constrained_fitness(index,1);
+            overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
     
          % Plot the points
-        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
+        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '.');
     
         % Keep the current plot active
         hold on;
@@ -988,27 +988,7 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
 
     % remove duplicate points from the pareto front array
     overall_rank_1_population = unique(overall_rank_1_population,'rows');
-
-    %% ADD THE FINAL PARETO SET TO THE PLOT OF ALL THE DIFFERENT DOMINANT SETS
-    % Turn off the hold to stop adding new plots to the current figure
-    scatter(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), 20, ...
-         'MarkerFaceColor',[0.5 ,.8, 0.2],...
-         'MarkerEdgeColor',[0.5, 0.8, 0.2],...
-         'LineWidth',0.75)
-
-    % Add labels and title (optional)
-    xlabel('Objective 1');
-    ylabel('Objective 2');
-    title('Dominant Solution Set From Each GA Run');
-    
-    % Display the legend (optional)
-    legend_str = arrayfun(@(i) sprintf('GA Run %d', i), 1:num_runs, 'UniformOutput', false);
-    final_element = 'Pareto Set';
-    legend_str = [legend_str, final_element];
-    legend(legend_str);
-
-    hold off;
-    %% Plot the Final Pareto Set
+    disp(overall_rank_1_population)
 
     % plot the final pareto front for the simulated number of GA runs
     figure('Name','Pareto Front');
@@ -1183,7 +1163,7 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
         % EFFECTS
         % determines rankls and picks out the indexes of the first rank
         % individuals
-        ranks = non_dominated_sort(objective_func_value_storage)
+        ranks = non_dominated_sort(constrained_fitness)
         rank_1_indexes_overall = find(ranks == 1);
     
          % storage variable for OVERALL (for all runs) "first rank" solutions
@@ -1195,13 +1175,13 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
             
             index = rank_1_indexes_overall(j);
         
-            overall_rank_1_population(j,1) = objective_func_value_storage(index,1);
-            overall_rank_1_population(j,2) = objective_func_value_storage(index,2);
+            overall_rank_1_population(j,1) = constrained_fitness(index,1);
+            overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
     
          % Plot the points
-        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
+        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '.');
     
         % Keep the current plot active
         hold on;
@@ -1233,27 +1213,6 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
 
     % remove duplicate points from the pareto front array
     overall_rank_1_population = unique(overall_rank_1_population,'rows');
-
-    %% ADD THE FINAL PARETO SET TO THE PLOT OF ALL THE DIFFERENT DOMINANT SETS
-    % Turn off the hold to stop adding new plots to the current figure
-    scatter(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), 20, ...
-         'MarkerFaceColor',[0.5 ,.8, 0.2],...
-         'MarkerEdgeColor',[0.5, 0.8, 0.2],...
-         'LineWidth',0.75)
-
-    % Add labels and title (optional)
-    xlabel('Objective 1');
-    ylabel('Objective 2');
-    title('Dominant Solution Set From Each GA Run');
-    
-    % Display the legend (optional)
-    legend_str = arrayfun(@(i) sprintf('GA Run %d', i), 1:num_runs, 'UniformOutput', false);
-    final_element = 'Pareto Set';
-    legend_str = [legend_str, final_element];
-    legend(legend_str);
-
-    hold off;
-    %% Plot the Final Pareto Set
 
     % plot the final pareto front for the simulated number of GA runs
     figure('Name','Pareto Front');
@@ -1434,7 +1393,7 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
         % EFFECTS
         % determines rankls and picks out the indexes of the first rank
         % individuals
-        ranks = non_dominated_sort(objective_func_value_storage)
+        ranks = non_dominated_sort(constrained_fitness)
         rank_1_indexes_overall = find(ranks == 1);
     
          % storage variable for OVERALL (for all runs) "first rank" solutions
@@ -1446,13 +1405,13 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
             
             index = rank_1_indexes_overall(j);
         
-            overall_rank_1_population(j,1) = objective_func_value_storage(index,1);
-            overall_rank_1_population(j,2) = objective_func_value_storage(index,2);
+            overall_rank_1_population(j,1) = constrained_fitness(index,1);
+            overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
     
          % Plot the points
-        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
+        plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '.');
     
         % Keep the current plot active
         hold on;
@@ -1485,27 +1444,6 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
 
     % remove duplicate points from the pareto front array
     overall_rank_1_population = unique(overall_rank_1_population,'rows');
-
-    %% ADD THE FINAL PARETO SET TO THE PLOT OF ALL THE DIFFERENT DOMINANT SETS
-    % Turn off the hold to stop adding new plots to the current figure
-    scatter(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), 20, ...
-         'MarkerFaceColor',[0.5 ,.8, 0.2],...
-         'MarkerEdgeColor',[0.5, 0.8, 0.2],...
-         'LineWidth',0.75)
-
-    % Add labels and title (optional)
-    xlabel('Objective 1');
-    ylabel('Objective 2');
-    title('Dominant Solution Set From Each GA Run');
-    
-    % Display the legend (optional)
-    legend_str = arrayfun(@(i) sprintf('GA Run %d', i), 1:num_runs, 'UniformOutput', false);
-    final_element = 'Pareto Set';
-    legend_str = [legend_str, final_element];
-    legend(legend_str);
-
-    hold off;
-    %% Plot the Final Pareto Set
 
     % plot the final pareto front for the simulated number of GA runs
     figure('Name','Pareto Front');
