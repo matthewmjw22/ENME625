@@ -1,0 +1,39 @@
+function Output = objective_functionRunMOGA_FFP(Input)
+x = [8.33 16.667 25 33.33 41.667];
+y1 = Input(1);
+y2 = Input(2);
+y3 = Input(3);
+y4 = Input(4);
+y5 = Input(5);
+
+global W_x
+global W_y
+global AirSpeed
+global sizeX 
+global sizeY
+global method
+global integrationFineness
+% % W_x = Input(2);
+% % W_y = Input(3);
+% % AirSpeed = Input(4);
+% % sizeX = Input(5);
+% % sizeY = Input(6);
+% % method = Input(7);
+% % integrationFineness = Input(8);
+
+ = [8.33 16.667 25 33.33 41.667];
+Reshaped = [
+
+F1 = getTimeFromPath(Input,W_x,W_y,AirSpeed,sizeX,sizeY,method,integrationFineness);
+
+Y1 = -((x(1) - 10)^2   +    (y1 - 8)^2   + (x(1) - 40)^2      +    (y1 - 20)^2);
+Y2 = -((x(2) - 10)^2   +    (y2 - 8)^2   + (x(2) - 40)^2      +    (y2 - 20)^2);
+Y3 = -((x(3) - 10)^2   +    (y3 - 8)^2   + (x(3) - 40)^2      +    (y3 - 20)^2);
+Y4 = -((x(4) - 10)^2   +    (y4 - 8)^2   + (x(4) - 40)^2      +    (y4 - 20)^2);
+Y5 = -((x(5) - 10)^2   +    (y5 - 8)^2   + (x(5) - 40)^2      +    (y5 - 20)^2);
+F2 = Y1 + Y2 + Y3 + Y4 + Y5;
+
+%Maximize distance from circle I think You have to make this batched
+% Should be pathpoints(i, 1) or pathPoint(i, 2)
+
+Output = [F1 F2];
