@@ -1,7 +1,5 @@
 function Output = objective_functionZDT3(Input)
 x1 = Input(1);
-
-x1 = Input(1);
 x2 = Input(2);
 x3 = Input(3);
 x4 = Input(4);
@@ -36,6 +34,5 @@ x30 = Input(30);
 
 g = 1 + (9/29)*sum(Input(2:30));
 F1 = x1; % Min
-F2 = 1 - sqrt(x1/g) - (x1/g)*sin(10*pi*x1);  %Min
-
+F2 = (1 - sqrt(x1/g) - (x1/g)*sin(10*pi*x1))*g;  %Min
 Output = [F1 F2];
