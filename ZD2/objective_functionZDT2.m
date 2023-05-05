@@ -33,6 +33,6 @@ x30 = Input(30);
 g = 1 + (9/29)*sum(Input(2:30));
 
 F1 = x1; % Min
-F2 = 1 - (x1/g)^2;  %Min
+F2 = (1 - (x1/g)^2)*g;  %Min
 
 Output = [F1 F2];
