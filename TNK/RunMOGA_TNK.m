@@ -6,7 +6,7 @@ clear all
 nvars = 2;
 lb = [0; 0];
 ub = [pi; pi];
-MaxGenerations_Data = 200;
+MaxGenerations_Data = 600;
 
 [X,fval,exitflag,output,population,score] = gammultiobjsolverTNK(nvars,lb,ub,MaxGenerations_Data);
 
@@ -22,5 +22,5 @@ for i = 1:size(population, 1)
     values(:, i) = objective_functionRunMOGA_TNK(population(i, :));
 end
 
-OS = (max(values(1, :)) - min(values(1,:)))*(max(values(2, :)) - min(values(2,:)));
+OS = (max(values(1, :)) - min(values(1,:)))*(max(values(2, :)) - min(values(2,:)))
 pareto_spread/OS

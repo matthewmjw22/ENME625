@@ -9,19 +9,19 @@ close all
 
 % TEST PROBLEM ---------> FUNCTION TO CALL
 %******************************************************************
-%    OSY       ---------> RUN_OSY(15, 250, 120)
-%    CTP       ---------> RUN_CTP(15, 250, 120)
-%    TNK       ---------> RUN_TNK(15, 200, 120)
-%   ZDT1       ---------> RUN_ZDT1(15, 600, 120)
-%   ZDT2       ---------> RUN_ZDT2(15, 600, 120)
-%   ZDT3       ---------> RUN_ZDT3(15, 600, 120)
-%   TNK MORO   ---------> RUN_TNK_MORO(15, 600, 120)
+%    OSY       ---------> RUN_OSY(15, 250, 120);
+%    CTP       ---------> RUN_CTP(15, 250, 120);
+%    TNK       ---------> RUN_TNK(15, 250, 120);
+%   ZDT1       ---------> RUN_ZDT1(15, 400, 120);
+%   ZDT2       ---------> RUN_ZDT2(15, 400, 120);
+%   ZDT3       ---------> RUN_ZDT3(15, 400, 120);
+%   TNK MORO   ---------> RUN_TNK_MORO(15, 600, 120);
 %******************************************************************
 
 %##########################################################################
 % CALL THE TEST PROBLEM YOU WISH TO RUN
 % ENTER THE PROBLEM DESIGNATOR AFTER RUN_
-RUN_CTP(15, 250, 120);
+RUN_ZDT1(15, 400, 120);
 %##########################################################################
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -52,7 +52,6 @@ function RUN_OSY(num_runs, population_size, num_generations)
     % analysis
     pareto_spread_storage = zeros(num_runs,1);
     cluster_storage = zeros(num_runs,1);
-    calls_per_pareto_storage = zeros(num_runs,1);
 
 
     for run = 1:num_runs
@@ -180,18 +179,18 @@ function RUN_OSY(num_runs, population_size, num_generations)
         
         end
 
-        % calculate the quality metrics for this instance (GA run) first
+        %% calculate the quality metrics for this instance (GA run) first
         % front non-dominated set
         % Pareto Spread
 
-        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population);
+        normalization_factor = 20147;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
     
         % cluster metric
         cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
-
-        % number of function calls per pareto point
-        calls_per_pareto_storage(run,1) =  ceil(output.funccount / length(overall_rank_1_population));
     
+        %% Plot the GA-Run's Non-Dominated Set
         % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
     
@@ -313,7 +312,7 @@ function RUN_OSY(num_runs, population_size, num_generations)
     ylabel('Values');
     title('Box and Whiskers Plot');
 
-    %% calculate the qaulity metrics
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
@@ -376,6 +375,12 @@ function RUN_CTP(num_runs, population_size, num_generations)
     % initilize counter for determining # of pareto points per function
     % call metric
     num_function_calls = 0;
+
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
 
     for run = 1:num_runs
     %---------------------------- CTP PROBLEM-------------------------------
@@ -505,6 +510,19 @@ function RUN_CTP(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
+
+        %% calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        normalization_factor = 1.7409;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
+    
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+    
+        %% Plot the GA-Run's Non-Dominated Set
     
          % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
@@ -616,7 +634,18 @@ function RUN_CTP(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
-    %% calculate the qaulity metrics
+    %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
@@ -679,6 +708,12 @@ function RUN_TNK(num_runs, population_size, num_generations)
     % initilize counter for determining # of pareto points per function
     % call metric
     num_function_calls = 0;
+
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
 
     for run = 1:num_runs
     %---------------------------- TNK PROBLEM-------------------------------
@@ -794,6 +829,19 @@ function RUN_TNK(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
+
+        %% calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        normalization_factor = 1.0173;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
+    
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+    
+        %% Plot the GA-Run's Non-Dominated Set
     
          % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
@@ -905,7 +953,18 @@ function RUN_TNK(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
-     %% calculate the qaulity metrics
+    %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
@@ -969,6 +1028,12 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
     % call metric
     num_function_calls = 0;
 
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
+
     for run = 1:num_runs
     %---------------------------- ZDT1 PROBLEM-------------------------------
     
@@ -980,8 +1045,8 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
-        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
+        %options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
+        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -1076,6 +1141,19 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = objective_func_value_storage(index,2);
         
         end
+
+        %% calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        normalization_factor = 2.6349;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
+    
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+    
+        %% Plot the GA-Run's Non-Dominated Set
     
          % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
@@ -1187,7 +1265,18 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
-     %% calculate the qaulity metrics
+    %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
@@ -1249,6 +1338,12 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
     % call metric
     num_function_calls = 0;
 
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
+
     for run = 1:num_runs
     %---------------------------- ZDT2 PROBLEM-------------------------------
     
@@ -1261,7 +1356,7 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
         options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
-        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
+        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -1344,7 +1439,7 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
         % EFFECTS
         % determines rankls and picks out the indexes of the first rank
         % individuals
-        ranks = non_dominated_sort(objective_func_value_storage)
+        ranks = non_dominated_sort(objective_func_value_storage);
         rank_1_indexes_overall = find(ranks == 1);
     
          % storage variable for OVERALL (for all runs) "first rank" solutions
@@ -1360,6 +1455,19 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = objective_func_value_storage(index,2);
         
         end
+
+        %% calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        normalization_factor = 0.4661;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
+    
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+    
+        %% Plot the GA-Run's Non-Dominated Set
     
          % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
@@ -1466,13 +1574,24 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
-     %% calculate the qaulity metrics
+     %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
     
     % cluster metric
-    clus = cluster(overall_rank_1_population, 200);
+    clus = cluster(overall_rank_1_population, 400);
 
     % number of function calls per pareto point
     calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
@@ -1532,6 +1651,12 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
     % call metric
     num_function_calls = 0;
 
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
+
     for run = 1:num_runs
     %---------------------------- ZDT1 PROBLEM-------------------------------
     
@@ -1543,8 +1668,8 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
-        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
+        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        %options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -1644,6 +1769,19 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = objective_func_value_storage(index,2);
         
         end
+
+        %% calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        normalization_factor = 3.4726;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
+    
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+    
+        %% Plot the GA-Run's Non-Dominated Set
     
          % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
@@ -1751,7 +1889,18 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
-     %% calculate the qaulity metrics
+     %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
@@ -2081,6 +2230,12 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
     % call metric
     num_function_calls = 0;
 
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
+
     for run = 1:num_runs
     %---------------------------- OSY PROBLEM-------------------------------
     
@@ -2205,6 +2360,19 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
+
+        %% calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        normalization_factor = 13384;
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population)/normalization_factor;
+    
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+    
+        %% Plot the GA-Run's Non-Dominated Set
     
          % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
@@ -2316,7 +2484,18 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
- %% calculate the qaulity metrics
+    %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics for the final Pareto front
 
     % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
