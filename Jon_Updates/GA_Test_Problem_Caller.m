@@ -4,29 +4,24 @@ close all
 
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-% GA run parameters
-num_runs = 20;
-population_size = 300;
-num_generations = 30;
-
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % FUNCTION LIBRARY
 
 % TEST PROBLEM ---------> FUNCTION TO CALL
 %******************************************************************
-%    OSY       ---------> RUN_OSY(num_runs, overall_runs_rank_1,...)
-%    CTP       ---------> RUN_CTP(num_runs, overall_runs_rank_1,...)
-%    TNK       ---------> RUN_TNK(num_runs, overall_runs_rank_1,...)
-%   ZDT1       ---------> RUN_ZDT1(num_runs, overall_runs_rank_1,...)
-%   ZDT2       ---------> RUN_ZDT2(num_runs, overall_runs_rank_1,...)
-%   ZDT3       ---------> RUN_ZDT3(num_runs, overall_runs_rank_1,...)
-%   TNK MORO   ---------> RUN_TNK_MORO(num_runs, overall_runs_rank_1,...)
+%    OSY       ---------> RUN_OSY(15, 250, 120)
+%    CTP       ---------> RUN_CTP(15, 250, 120)
+%    TNK       ---------> RUN_TNK(15, 200, 120)
+%   ZDT1       ---------> RUN_ZDT1(15, 600, 120)
+%   ZDT2       ---------> RUN_ZDT2(15, 600, 120)
+%   ZDT3       ---------> RUN_ZDT3(15, 600, 120)
+%   TNK MORO   ---------> RUN_TNK_MORO(15, 600, 120)
 %******************************************************************
 
 %##########################################################################
 % CALL THE TEST PROBLEM YOU WISH TO RUN
 % ENTER THE PROBLEM DESIGNATOR AFTER RUN_
-RUN_OSY(num_runs, population_size, num_generations);
+RUN_CTP(15, 250, 120);
 %##########################################################################
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -46,7 +41,19 @@ function RUN_OSY(num_runs, population_size, num_generations)
     h = waitbar(0, 'Determining Pareto Front...');
 
     %create figure for stochastic element plotting
-    figure;
+    figure('Name', 'Each GA Run Non Dominant Set');
+
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
+    %initizlize quality metric storage arrays
+    % these arrays will store each GA run's quality metrics for future
+    % analysis
+    pareto_spread_storage = zeros(num_runs,1);
+    cluster_storage = zeros(num_runs,1);
+    calls_per_pareto_storage = zeros(num_runs,1);
+
 
     for run = 1:num_runs
     %---------------------------- OSY PROBLEM-------------------------------
@@ -57,10 +64,11 @@ function RUN_OSY(num_runs, population_size, num_generations)
         
         options = optimoptions('ga');
         options = optimoptions(options,'MaxGenerations', num_generations);
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size))
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
-        options = optimoptions(options,'Display', 'iter');
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
+        %options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
         options = optimoptions(options,'Vectorized', 'on')
@@ -70,7 +78,9 @@ function RUN_OSY(num_runs, population_size, num_generations)
        
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_OSY,nvars,[],[],[],[],lb,ub,[],options);
-       
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -169,8 +179,20 @@ function RUN_OSY(num_runs, population_size, num_generations)
             overall_rank_1_population(j,2) = constrained_fitness(index,2);
         
         end
+
+        % calculate the quality metrics for this instance (GA run) first
+        % front non-dominated set
+        % Pareto Spread
+
+        pareto_spread_storage(run,1) = Pareto_Spread(overall_rank_1_population);
     
-         % Plot the points
+        % cluster metric
+        cluster_storage(run,1) = cluster(overall_rank_1_population, 200);
+
+        % number of function calls per pareto point
+        calls_per_pareto_storage(run,1) =  ceil(output.funccount / length(overall_rank_1_population));
+    
+        % Plot the points
         plot(overall_rank_1_population(:,1),  overall_rank_1_population(:,2), '*');
     
         % Keep the current plot active
@@ -183,11 +205,11 @@ function RUN_OSY(num_runs, population_size, num_generations)
     
     end
 
-
     % Close the waitbar
     close(h);
     
 
+    %% Determine the Final Pareto Front from the population
     % determines rankls and picks out the indexes of the first rank
     % individuals
     ranks = non_dominated_sort(population_storage);
@@ -280,10 +302,27 @@ function RUN_OSY(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+    %% Plot the statistics for the independent GA run quality metrics
+
+    figure('Name', 'Quality Metric Box and Whiskers Plot');
+    % Create a box and whiskers plot using the grouping variable
+    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    
+    % Add labels and a title
+    xlabel('Groups');
+    ylabel('Values');
+    title('Box and Whiskers Plot');
+
+    %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
-    pareto_spread;
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
-    clus;
+
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
 
     % Initialize an array to store the distances
     distances = zeros(size(overall_rank_1_population, 1), 1);
@@ -306,6 +345,7 @@ function RUN_OSY(num_runs, population_size, num_generations)
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -333,6 +373,10 @@ function RUN_CTP(num_runs, population_size, num_generations)
     % Create the waitbar
     h = waitbar(0, 'Determining Pareto Front...');
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- CTP PROBLEM-------------------------------
     
@@ -343,8 +387,9 @@ function RUN_CTP(num_runs, population_size, num_generations)
        options = optimoptions('ga');
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -355,6 +400,9 @@ function RUN_CTP(num_runs, population_size, num_generations)
        
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_CTP,nvars,[],[],[],[],lb,ub,[],options);
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -568,16 +616,39 @@ function RUN_CTP(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+    %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
-    pareto_spread;
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
-    clus;
+
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
 
      table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -605,6 +676,10 @@ function RUN_TNK(num_runs, population_size, num_generations)
     % Create the waitbar
     h = waitbar(0, 'Determining Pareto Front...');
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- TNK PROBLEM-------------------------------
     
@@ -615,8 +690,9 @@ function RUN_TNK(num_runs, population_size, num_generations)
         options = optimoptions('ga');
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -627,6 +703,10 @@ function RUN_TNK(num_runs, population_size, num_generations)
        
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_TNK,nvars,[],[],[],[],lb,ub,[],options);
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
+
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -825,16 +905,39 @@ function RUN_TNK(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+     %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
-    pareto_spread;
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
-    clus;
+
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
 
      table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -862,6 +965,10 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
     % Create the waitbar
     h = waitbar(0, 'Determining Pareto Front...');
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- ZDT1 PROBLEM-------------------------------
     
@@ -873,7 +980,8 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -885,6 +993,10 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_ZDT1,nvars,[],[],[],[],lb,ub,[],options);
         %legend('Population','Best');
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
+
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -1075,14 +1187,39 @@ function RUN_ZDT1(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+     %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
 
-    table_data = {
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
+
+     table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -1108,6 +1245,10 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
      % Create the waitbar
     h = waitbar(0, 'Determining Pareto Front...');
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- ZDT2 PROBLEM-------------------------------
     
@@ -1119,17 +1260,22 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
-        options = optimoptions(options,'Vectorized', 'on')
+        options = optimoptions(options,'Vectorized', 'on');
         options = optimoptions(options,'PopulationSize', population_size);
     
         gen = 0;
         
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_ZDT2,nvars,[],[],[],[],lb,ub,[],options);
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
+
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -1320,14 +1466,39 @@ function RUN_ZDT2(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+     %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
 
-    table_data = {
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
+
+     table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -1357,6 +1528,10 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
     % Create the waitbar
     h = waitbar(0, 'Determining Pareto Front...');
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- ZDT1 PROBLEM-------------------------------
     
@@ -1368,7 +1543,8 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -1380,7 +1556,10 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
         
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_ZDT3,nvars,[],[],[],[],lb,ub,[],options);
-        
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
+
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
         % generation population
@@ -1572,14 +1751,39 @@ function RUN_ZDT3(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
-    pareto_spread = Pareto_Spread(overall_rank_1_population);
-    clus = cluster(overall_rank_1_population, 500);
+     %% calculate the qaulity metrics
 
-    table_data = {
+    % Pareto Spread
+    pareto_spread = Pareto_Spread(overall_rank_1_population);
+    
+    % cluster metric
+    clus = cluster(overall_rank_1_population, 200);
+
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
+
+     table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -1610,6 +1814,10 @@ function RUN_TNK_MORO(num_runs, population_size, num_generations)
     %Create the waitbar
     h = waitbar(0, 'Determining Pareto Front...');
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- TNK PROBLEM-------------------------------
 
@@ -1621,7 +1829,8 @@ function RUN_TNK_MORO(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size))'
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -1632,6 +1841,9 @@ function RUN_TNK_MORO(num_runs, population_size, num_generations)
        
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_TNK_MORO,nvars,[],[],[],[],lb,ub,[],options);
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -1804,14 +2016,39 @@ function RUN_TNK_MORO(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+     %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
+
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
 
      table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
@@ -1820,7 +2057,6 @@ function RUN_TNK_MORO(num_runs, population_size, num_generations)
 
     % Create a table in the figure
     uitable(fig, 'Data', table_data);
-
 end
 %----------------------------------------------------------------------------
 
@@ -1841,6 +2077,10 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
     %create figure for stochastic element plotting
     figure;
 
+    % initilize counter for determining # of pareto points per function
+    % call metric
+    num_function_calls = 0;
+
     for run = 1:num_runs
     %---------------------------- OSY PROBLEM-------------------------------
     
@@ -1852,7 +2092,8 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
         options = optimoptions(options,'MaxGenerations', num_generations);
         options = optimoptions(options,'CreationFcn', @gacreationuniform);
         options = optimoptions(options,'CrossoverFcn', @crossoverscattered);
-        options = optimoptions(options,'MutationFcn', {  @mutationuniform [] });
+        options = optimoptions(options,'EliteCount', ceil(0.85*population_size));
+        options = optimoptions(options,'MutationFcn', {  @mutationadaptfeasible [] });
         options = optimoptions(options,'Display', 'iter');
         options = optimoptions(options,'MaxStallGenerations', 40);
         %options = optimoptions(options, 'PlotFcn', @gaplotbestf);
@@ -1863,7 +2104,9 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
        
         % call the GA for the required test problem
         [x,fval,exitflag,output,population,score] = ga(@GA_Fitness_Func_OSY_Obj_First,nvars,[],[],[],[],lb,ub,[],options);
-       
+
+        % Extract the number of function evaluations from the output structure
+        num_function_calls = num_function_calls + output.funccount;
 
         %---------------------------------------------------------
         % calculating the objectivre function values for the final
@@ -2073,16 +2316,39 @@ function RUN_OSY_Obj_First(num_runs, population_size, num_generations)
     % Display the plot
     hold off;
 
+ %% calculate the qaulity metrics
+
+    % Pareto Spread
     pareto_spread = Pareto_Spread(overall_rank_1_population);
-    pareto_spread;
+    
+    % cluster metric
     clus = cluster(overall_rank_1_population, 200);
-    clus;
+
+    % number of function calls per pareto point
+    calls_per_pareto =  ceil(num_function_calls / length(overall_rank_1_population)); 
+
+    % Initialize an array to store the distances
+    distances = zeros(size(overall_rank_1_population, 1), 1);
+    
+    % Loop through each point and calculate the distance
+    for i = 1:size(overall_rank_1_population, 1)
+        distances(i) = norm(overall_rank_1_population(i, :) - [-300 0]);
+    end
+    
+    % Calculate the mean and standard deviation of the distances
+    mean_distance = mean(distances);
+    std_distance = std(distances);
+    
+    % Print out the results
+    fprintf('Mean distance: %.2f\n', mean_distance);
+    fprintf('Standard deviation of distances: %.2f\n', std_distance);
 
      table_data = {
                     
                  'Number of Pareto Points', length(overall_rank_1_population);
                  'Pareto Spread', pareto_spread;
                  ' cluster metric', clus
+                 'function calls per pareto point', calls_per_pareto
         
                  }
 
