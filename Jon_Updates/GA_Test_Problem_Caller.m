@@ -21,7 +21,7 @@ close all
 %##########################################################################
 % CALL THE TEST PROBLEM YOU WISH TO RUN
 % ENTER THE PROBLEM DESIGNATOR AFTER RUN_
-RUN_ZDT1(15, 400, 120);
+RUN_OSY(12, 250, 120);
 %##########################################################################
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -162,7 +162,7 @@ function RUN_OSY(num_runs, population_size, num_generations)
         %% PLOTS THE FIRST FRONT FOR EACH RUN - HIGHLIGHTS STOCHASTIC EFFECTS
         % determines ranks and picks out the indexes of the first rank
         % individuals
-        ranks = non_dominated_sort(constrained_fitness)
+        ranks = non_dominated_sort(constrained_fitness);
         rank_1_indexes_overall = find(ranks == 1);
     
          % storage variable for OVERALL (for all runs) "first rank" solutions
