@@ -278,12 +278,12 @@ function RUN_CTP(num_runs, population_size, num_generations)
 
     figure('Name', 'Quality Metric Box and Whiskers Plot');
     % Create a box and whiskers plot using the grouping variable
-    boxplot([pareto_spread_storage,cluster_storage],'Notch','on','Labels',{'Pareto Spread','Cluster'})
+    boxplot([pareto_spread_storage,cluster_storage],'Labels',{'Pareto Spread','Cluster'})
     
     % Add labels and a title
-    xlabel('Groups');
-    ylabel('Values');
-    title('Box and Whiskers Plot');
+    xlabel('Quality Metrics');
+    ylabel('Quality Metric Values');
+    title('CTP Quality Metrics Box and Whiskers Plot');
 
     %% calculate the qaulity metrics for the final Pareto front
 
